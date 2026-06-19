@@ -3,7 +3,7 @@
 size_t su_strlcpy(char *dst, const char *src, size_t dstsize){
     // evaluons la taille de la source
    const char *src_temp = src;
-    int src_taille = 0;
+    size_t src_taille = 0;
     while(*src_temp != '\0')
         {
             src_taille++;
@@ -11,7 +11,7 @@ size_t su_strlcpy(char *dst, const char *src, size_t dstsize){
         }
     // maintenant on copy du plus petit des 2 taille
     if (dstsize <= 0) return src_taille;
-    int count = (src_taille < dstsize -1)?src_taille:dstsize-1;
+    size_t count = (src_taille < dstsize -1)?src_taille:dstsize-1;
     for (size_t i = 0; i < count; i++)
     {
         dst[i] = src[i];
@@ -25,7 +25,7 @@ size_t su_strlcpy(char *dst, const char *src, size_t dstsize){
 
 size_t su_strlcat(char *dst, const char *src, size_t dstsize){
     // fonction de concatenation , recuperons d'abord la chaine a concatene
-    int dest_taille = 0, src_taille = 0;
+    size_t dest_taille = 0, src_taille = 0;
 
     // on compte le nombre d'element dans la destination
     const char * dest_temp = dst;
@@ -41,7 +41,7 @@ size_t su_strlcat(char *dst, const char *src, size_t dstsize){
         }
         int i=0;
         if (dstsize <=0) return (dest_taille + src_taille);
-        int count = (dstsize-1 < (dest_taille + src_taille))?dstsize-1: (dest_taille + src_taille);
+        size_t count = (dstsize-1 < (dest_taille + src_taille))?dstsize-1: (dest_taille + src_taille);
     while(dest_taille + i < count){
         dst[dest_taille + i] = src[i];
         i++;
@@ -61,7 +61,7 @@ int su_itoa(int val, char *buf, size_t bufsize, int base){
     // verifion si la valeur est negatif ou positif
     if(val < 0 || base == 10){
         // negatif vers positif
-        int j=0;
+        size_t j=0;
         if(val<0){
             buf[j] = '-';
             j++;
@@ -79,7 +79,7 @@ int su_itoa(int val, char *buf, size_t bufsize, int base){
         // on va se servir de la decomposition des nombre pour la convertion en chaine
         // calculons d'abord l'unite max
         int val_temp=val, divi = 10;
-        int nrb_ele=1;
+        size_t nrb_ele=1;
         do{
             nrb_ele ++;
             divi *=10;
@@ -133,7 +133,7 @@ int su_itoa(int val, char *buf, size_t bufsize, int base){
 
 
     int rst;
-    int i=0;
+    size_t i=0;
     char rst_c[bufsize];
     while(val !=0){
         rst = val % base;
@@ -146,7 +146,7 @@ int su_itoa(int val, char *buf, size_t bufsize, int base){
             
             for(int l=i;l<=0;l--){
                 buf[i-l] = rst_c[l]; 
-                printf(" valeur convertit %s ",buf);
+               
                 
         }
         buf[i] = '\0';
@@ -156,9 +156,9 @@ int su_itoa(int val, char *buf, size_t bufsize, int base){
             
     }
     for(int l=i-1;l>=0;l--)
-                buf[i-l-1] = rst_c[l]; 
-            printf("voici la derniere valeur %d\n",i);
-                buf[i] = '\0';
+                {buf[i-l-1] = rst_c[l]; }
+           
+buf[i] = '\0';
 return i;
 }
 
@@ -224,8 +224,9 @@ return str;
 bool su_startswith(const char *str, const char *prefix){
     // on verifie si str commence par le prefix
     bool meme = true;
-    if(str == NULL || prefix == NULL)
+    if(str == NULL || prefix == NULL){
         return false;
+    }
         int i=0;
     while(true){
         if(*(str + i) != *(prefix +i)){
