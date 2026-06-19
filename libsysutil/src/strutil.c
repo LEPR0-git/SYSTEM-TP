@@ -231,12 +231,10 @@ bool su_startswith(const char *str, const char *prefix){
         if(*(str + i) != *(prefix +i)){
             return false;
         }
-        if(*(prefix + i) == '\0' && ( *(str +i) == '\0' || *(str +i) != '\0')){
+        if(*(prefix + i + 1) == '\0' && ( *(str +i + 1) == '\0' || *(str +i + 1) != '\0')){
             return meme;
         }
-        else{
-            return false;
-        }
+        
         i++;
     }
 }
