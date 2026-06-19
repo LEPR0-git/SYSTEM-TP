@@ -161,46 +161,33 @@ int su_itoa(int val, char *buf, size_t bufsize, int base){
                 buf[i] = '\0';
 return i;
 }
+
 char *su_strtok_r(char *str, char delim, char **saveptr){
-    // decoupage de la chaine avec le delimiteur delim
-    // on va compte le nombre de block 
-    char *str_temp = str;
-    int count=0;
-    while (*str_temp != '\0' )
-    {
-        count +=1;
+    //on verifie si le dernier token etais null
+    // on va verifier que la chainne n'est pas NULL
+    if(str != NULL)
+        *saveptr = str;
+    // on evalue si on est a un delimiteur ou a la fin de la chaine 
+    if(*saveptr == NULL || **saveptr == '\0') // fin de lecture
+        return NULL;
+    while(**saveptr == delim)
+            (*saveptr)++;
+    if(**saveptr == '\0')
+        return NULL;
         
-        do{str_temp +=1;}while(*str_temp != delim && *str_temp!= '0');
-    }
-    count = (*str == delim)? count + 1:count;
-    // on va alouer de l'espace a chaque bloc tout en lisant son contenue et le copier
-    saveptr = malloc(sizeof(char*)*count);
-    int i=0;
-    str_temp = str;
-    char *str_temp2 = str;
-    for(int j=0; j<count;j++){
-    while(*str_temp != '\0')
-    { i=0;
-        do{
-        if(*str_temp != delim){
-            i++;
-            break;
-        }
-        *str_temp +=1;
-    }while(*str_temp != '\0');
-
-    saveptr[j] = malloc(sizeof(char)*i);
-    for(int k=0; k<i;k++){
-        saveptr[j][k] = str_temp2++;
-    }
-    saveptr[j][i] = '\0';
-    // on deplace du delimiteur 
-    str_temp2++;
+char *token = *saveptr;
+    // on positionne ferme le prochain delim ou a la fin
+    while(**saveptr != delim && **saveptr != '\0'){
+            (*saveptr)++;   
 
     }
+    if(**saveptr == delim){
+    **saveptr = '\0';
+    (*saveptr)++; 
     }
-    return *saveptr;
+    return token;
 }
+
 
 char su_trim(char *str){
     // on va trimmer la chaine str
