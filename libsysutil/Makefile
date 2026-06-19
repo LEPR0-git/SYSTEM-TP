@@ -1,172 +1,162 @@
-# ============================================
-# VARIABLES
-# ============================================
-CC      = gcc
-CFLAGS  = -Wall -Wextra -Werror -std=c99 -g -Iinclude
-# -Iinclude : dit au compilateur de chercher les .h dans include/
+# ══════════════════════════════════════════════════════════════
+#  Makefile — libsysutil
+#  INF362 Programmation Système — UY1 Faculté des Sciences
+# ══════════════════════════════════════════════════════════════
 
-SRCDIR  = src
-OBJDIR  = obj
-BINDIR  = bin
-LIBDIR  = lib
-TESTDIR = tests
-DEMODIR = demo
+# ── Variables imposées ─────────────────────────────────────────
+CC      := gcc
+CFLAGS  := -Wall -Wextra -Werror -std=c99 -g
+CFLAGS_SO := -Wall -Wextra -std=c99 -g   # -Werror retiré pour -fPIC sur certains GCC
 
-# Modules : les noms des fichiers sans extension
-MODULES = llist strutil
+INCDIR  := include
+SRCDIR  := src
+OBJDIR  := obj
+LIBDIR  := lib
+BINDIR  := bin
+TESTDIR := tests
+DEMODIR := demo
 
-# Fichiers source
-SRCS = $(addprefix $(SRCDIR)/, $(addsuffix .c, $(MODULES)))
-# SRCS = src/llist.c src/strutil.c
+# ── Sources et objets ──────────────────────────────────────────
+SRCS    := $(SRCDIR)/strutil.c $(SRCDIR)/llist.c
+OBJS    := $(OBJDIR)/strutil.o $(OBJDIR)/llist.o
 
-# Fichiers objets
-OBJS = $(addprefix $(OBJDIR)/, $(addsuffix .o, $(MODULES)))
-# OBJS = obj/llist.o obj/strutil.o
+# Dépendances automatiques générées par -MMD -MP
+DEPS    := $(OBJS:.o=.d)
 
-# Fichiers de dépendances (générés par -MMD)
-DEPS = $(OBJS:.o=.d)
-# DEPS = obj/llist.d obj/strutil.d
+# Bibliothèques produites
+LIB_STATIC  := $(LIBDIR)/libsysutil.a
+LIB_DYNAMIC := $(LIBDIR)/libsysutil.so
 
-# Tests (exécutables)
-TESTS = $(BINDIR)/test_llist $(BINDIR)/test_strutil
+# Exécutables de test
+TEST_STRUTIL := $(BINDIR)/test_strutil
+TEST_LLIST   := $(BINDIR)/test_llist
 
-# Démo
-DEMO = $(BINDIR)/demo
+# Exécutables de démo
+DEMO         := $(BINDIR)/demo
+DEMO_DL      := $(BINDIR)/demo_dl
 
-# ============================================
-# .PHONY : cibles qui ne créent pas de fichier
-# ============================================
-.PHONY: all test lib-static lib-dynamic clean fclean re help nm-check objdump-check
+# ── Cible par défaut : tout compiler ──────────────────────────
+.PHONY: all
+all: $(TEST_STRUTIL) $(TEST_LLIST) $(DEMO) $(DEMO_DL)
+	@echo ""
+	@echo "╔══════════════════════════════════════╗"
+	@echo "║  Build complet OK                    ║"
+	@echo "╚══════════════════════════════════════╝"
 
-# ============================================
-# RÈGLE PAR DÉFAUT : compile tout
-# ============================================
-all: $(DEMO) $(TESTS)
-
-# ============================================
-# CRÉATION DES DOSSIERS (si inexistants)
-# ============================================
-$(OBJDIR) $(BINDIR) $(LIBDIR):
-	mkdir -p $@
-# -p : crée les dossiers parents si nécessaire, pas d'erreur si existe déjà
-
-# ============================================
-# RÈGLE GÉNÉRIQUE : compile un .c en .o
-# $< = le fichier .c source
-# $@ = le fichier .o produit
-# -MMD : génère un fichier .d de dépendances
-# -MP  : évite les erreurs si un .h est supprimé
-# -c   : compile sans lier
-# | $(OBJDIR) : dépend de l'existence du dossier obj/
-# ============================================
+# ── Règle générique : obj/%.o depuis src/%.c ──────────────────
+# Utilise les variables automatiques $< (source) et $@ (cible)
+# -MMD -MP génère les fichiers .d de dépendances automatiques
 $(OBJDIR)/%.o: $(SRCDIR)/%.c | $(OBJDIR)
-	$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
+	$(CC) $(CFLAGS) -MMD -MP -I$(INCDIR) -c $< -o $@
 
-# ============================================
-# INCLUSION DES DÉPENDANCES
-# Permet de recompiler automatiquement si un .h change
-# Le - devant include évite l'erreur si le fichier .d n'existe pas encore
-# ============================================
+# Inclusion des dépendances automatiques (silencieux si absents)
 -include $(DEPS)
 
-# ============================================
-# PROGRAMME DE DÉMO
-# Lie demo.c avec les 2 .o des modules
-# $^ = demo/demo.c obj/llist.o obj/strutil.o
-# ============================================
+# ── Exécutables de test ────────────────────────────────────────
+$(TEST_STRUTIL): $(TESTDIR)/test_strutil.c $(OBJS) | $(BINDIR)
+	$(CC) $(CFLAGS) -I$(INCDIR) $^ -o $@
+
+$(TEST_LLIST): $(TESTDIR)/test_llist.c $(OBJS) | $(BINDIR)
+	$(CC) $(CFLAGS) -I$(INCDIR) $^ -o $@
+
+# ── Exécutable de démo ─────────────────────────────────────────
 $(DEMO): $(DEMODIR)/demo.c $(OBJS) | $(BINDIR)
-	$(CC) $(CFLAGS) -o $@ $^
-# Exemple : gcc -Wall... -Iinclude -o bin/demo demo/demo.c obj/llist.o obj/strutil.o
+	$(CC) $(CFLAGS) -I$(INCDIR) $^ -o $@
 
-# ============================================
-# TESTS
-# Chaque test est lié avec le .o de son module
-# ============================================
-$(BINDIR)/test_llist: $(TESTDIR)/test_llist.c $(OBJDIR)/llist.o | $(BINDIR)
-	$(CC) $(CFLAGS) -o $@ $^
+# ── Bibliothèque statique ──────────────────────────────────────
+.PHONY: lib-static
+lib-static: $(LIB_STATIC)
 
-$(BINDIR)/test_strutil: $(TESTDIR)/test_strutil.c $(OBJDIR)/strutil.o | $(BINDIR)
-	$(CC) $(CFLAGS) -o $@ $^
+$(LIB_STATIC): $(OBJS) | $(LIBDIR)
+	ar rcs $@ $^
+	@echo "[lib-static] $(LIB_STATIC) créée."
 
-# ============================================
-# BIBLIOTHÈQUE STATIQUE (.a)
-# ar   : outil d'archivage
-# r    : insère/remplace les fichiers
-# c    : crée l'archive si elle n'existe pas
-# s    : écrit un index (accélère l'accès)
-# ============================================
-lib-static: $(OBJS) | $(LIBDIR)
-	ar rcs $(LIBDIR)/libsysutil.a $(OBJS)
-# Crée lib/libsysutil.a à partir de obj/llist.o et obj/strutil.o
+# ── Bibliothèque dynamique ─────────────────────────────────────
+.PHONY: lib-dynamic
+lib-dynamic: $(LIB_DYNAMIC)
 
-# ============================================
-# BIBLIOTHÈQUE DYNAMIQUE (.so)
-# -shared : crée une bibliothèque partagée
-# -fPIC   : Position Independent Code (obligatoire pour .so)
-# ============================================
-lib-dynamic: $(OBJS) | $(LIBDIR)
-	$(CC) -shared -fPIC -o $(LIBDIR)/libsysutil.so $(OBJS)
-# Crée lib/libsysutil.so
+# Les .o pour .so doivent être compilés avec -fPIC
+$(OBJDIR)/strutil_pic.o: $(SRCDIR)/strutil.c | $(OBJDIR)
+	$(CC) $(CFLAGS_SO) -fPIC -MMD -MP -I$(INCDIR) -c $< -o $@
 
-# ============================================
-# RÈGLE TEST : compile et exécute les tests
-# @ : n'affiche pas la commande elle-même
-# -e : active l'interprétation des backslashes
-# -n : ne fait pas de saut de ligne
-# ./$$test && echo PASS || echo FAIL
-#   -> si le test réussit (code 0) : affiche PASS
-#   -> si le test échoue (code != 0) : affiche FAIL
-# ============================================
-test: $(TESTS)
-	@echo "=== Exécution des tests ==="
-	@for test in $(TESTS); do \
-		echo -n "$$test : "; \
-		./$$test > /dev/null 2>&1 && echo "PASS" || echo "FAIL"; \
-	done
+$(OBJDIR)/llist_pic.o: $(SRCDIR)/llist.c | $(OBJDIR)
+	$(CC) $(CFLAGS_SO) -fPIC -MMD -MP -I$(INCDIR) -c $< -o $@
 
-# ============================================
-# NETTOYAGE
-# ============================================
+$(LIB_DYNAMIC): $(OBJDIR)/strutil_pic.o $(OBJDIR)/llist_pic.o | $(LIBDIR)
+	$(CC) $(CFLAGS_SO) -shared -fPIC $^ -o $@
+	@echo "[lib-dynamic] $(LIB_DYNAMIC) créée."
+
+# ── demo_dl : chargement dynamique via dlopen ─────────────────
+$(DEMO_DL): $(DEMODIR)/demo_dl.c | $(BINDIR)
+	$(CC) $(CFLAGS) -I$(INCDIR) $< -o $@ -ldl
+	@echo "[demo_dl] $(DEMO_DL) compilé."
+
+.PHONY: demo-dl
+demo-dl: $(LIB_DYNAMIC) $(DEMO_DL)
+	@echo "--- Exécution demo_dl ---"
+	LD_LIBRARY_PATH=$(LIBDIR) $(DEMO_DL)
+
+# ── Règle test : compile + exécute + PASS/FAIL ────────────────
+.PHONY: test
+test: $(TEST_STRUTIL) $(TEST_LLIST)
+	@echo ""
+	@echo "=== test_strutil ==="
+	@$(TEST_STRUTIL) ; \
+	  if [ $$? -eq 0 ]; then echo ">> PASS : test_strutil"; \
+	  else echo ">> FAIL : test_strutil"; fi
+	@echo ""
+	@echo "=== test_llist ==="
+	@$(TEST_LLIST) ; \
+	  if [ $$? -eq 0 ]; then echo ">> PASS : test_llist"; \
+	  else echo ">> FAIL : test_llist"; fi
+
+# ── Analyse nm ────────────────────────────────────────────────
+.PHONY: nm-check
+nm-check: $(LIB_STATIC)
+	@echo "=== Symboles exportés (type T) de libsysutil.a ==="
+	nm -g $(LIB_STATIC)
+	@echo ""
+	@echo "=== Dépendances externes (type U) ==="
+	nm -u $(LIB_STATIC)
+
+# ── Analyse objdump ───────────────────────────────────────────
+.PHONY: objdump-check
+objdump-check: $(OBJDIR)/llist.o
+	@echo "=== Désassemblage de llist.o ==="
+	objdump -d $(OBJDIR)/llist.o
+
+# ── Création des répertoires si absents ───────────────────────
+$(OBJDIR) $(LIBDIR) $(BINDIR):
+	mkdir -p $@
+
+# ── Nettoyage ─────────────────────────────────────────────────
+.PHONY: clean
 clean:
-	rm -rf $(OBJDIR)/*
-# Supprime tout le contenu de obj/
+	rm -rf $(OBJDIR)
+	@echo "[clean] Fichiers objets supprimés."
 
+.PHONY: fclean
 fclean: clean
-	rm -rf $(BINDIR)/* $(LIBDIR)/*
-# Supprime aussi bin/ et lib/
+	rm -rf $(LIBDIR) $(BINDIR)
+	@echo "[fclean] Bibliothèques et exécutables supprimés."
 
+.PHONY: re
 re: fclean all
-# Nettoie tout puis reconstruit
 
-# ============================================
-# AIDE
-# @echo : affiche le texte (le @ cache la commande)
-# ============================================
+# ── Aide ──────────────────────────────────────────────────────
+.PHONY: help
 help:
+	@echo ""
 	@echo "Cibles disponibles :"
-	@echo "  make            : compile la démo et les tests"
-	@echo "  make test       : exécute les tests (PASS/FAIL)"
-	@echo "  make lib-static : crée lib/libsysutil.a"
-	@echo "  make lib-dynamic: crée lib/libsysutil.so"
-	@echo "  make clean      : supprime obj/"
-	@echo "  make fclean     : supprime obj/, bin/, lib/"
-	@echo "  make re         : fclean + all"
-	@echo "  make nm-check   : symboles de la bibliothèque"
-	@echo "  make objdump-check : désassemble strutil.o"
-
-# ============================================
-# INSPECTION DES BINAIRES
-# ============================================
-
-# nm-check : affiche les fonctions exportées
-# nm -g  : montre seulement les symboles globaux
-# grep T : filtre les fonctions (T = code/texte)
-nm-check: lib-static
-	@echo "=== Symboles dans libsysutil.a ==="
-	nm -g $(LIBDIR)/libsysutil.a | grep " T "
-
-# objdump-check : désassemble strutil.o
-# objdump -d : montre le code assembleur
-objdump-check: $(OBJDIR)/strutil.o
-	@echo "=== Désassemblage de strutil.o ==="
-	objdump -d $(OBJDIR)/strutil.o
+	@echo "  all           — compile tests + demo + demo_dl  (défaut)"
+	@echo "  lib-static    — crée lib/libsysutil.a"
+	@echo "  lib-dynamic   — crée lib/libsysutil.so"
+	@echo "  test          — compile et exécute test_strutil + test_llist (PASS/FAIL)"
+	@echo "  demo-dl       — compile et exécute demo_dl (dlopen)"
+	@echo "  nm-check      — affiche les symboles de libsysutil.a"
+	@echo "  objdump-check — désassemble llist.o"
+	@echo "  clean         — supprime obj/"
+	@echo "  fclean        — supprime obj/ lib/ bin/"
+	@echo "  re            — fclean + all"
+	@echo "  help          — affiche ce message"
+	@echo ""
