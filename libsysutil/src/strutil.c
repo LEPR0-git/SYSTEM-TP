@@ -10,6 +10,7 @@ size_t su_strlcpy(char *dst, const char *src, size_t dstsize){
             src_temp +=1;
         }
     // maintenant on copy du plus petit des 2 taille
+    if (dstsize <= 0) return src_taille;
     int count = (src_taille < dstsize -1)?src_taille:dstsize-1;
     for (size_t i = 0; i < count; i++)
     {
@@ -24,18 +25,29 @@ size_t su_strlcpy(char *dst, const char *src, size_t dstsize){
 
 size_t su_strlcat(char *dst, const char *src, size_t dstsize){
     // fonction de concatenation , recuperons d'abord la chaine a concatene
-    char ch_cat[dstsize];
-    int src_taille = su_strlcpy(ch_cat, src, dstsize);
-    int rst_taille = src_taille + dstsize;
-    char rst[rst_taille];
-    int i=0;
-    while( *ch_cat != '\0'){
-        rst[i] = dst[i];
-        rst[dstsize + i ] = ch_cat[i];
+    int dest_taille = 0, src_taille = 0;
+
+    // on compte le nombre d'element dans la destination
+    char * dest_temp = dst;
+        while(*dest_temp != '\0'){
+            dest_taille++;
+            dest_temp+=1;
+        }
+    // on compte la taille de la src
+    dest_temp = src;
+        while(*dest_temp != '\0'){
+            src_taille++;
+            dest_temp+=1;
+        }
+        int i=0;
+        if (dstsize <=0) return (dest_taille + src_taille);
+        int count = (dstsize-1 < (dest_taille + src_taille))?dstsize-1: (dest_taille + src_taille);
+    while(dest_taille + i < count){
+        dst[dest_taille + i] = src[i];
         i++;
     }
-    rst[rst_taille] = '\0';
-    return  rst_taille;
+    dst[i+src_taille] = '\0';
+    return  dest_taille + src_taille;
 }
 
 int su_itoa(int val, char *buf, size_t bufsize, int base){
