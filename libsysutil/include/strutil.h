@@ -12,7 +12,7 @@ int su_itoa(int val, char *buf, size_t bufsize, int base); // convertion entier 
 
 char *su_strtok_r(char *str, char delim, char **saveptr); // decouper la chaine par delimiteur (thread-safe)
 
-char su_trim(char *str); // retire les espace en debut et en fin 
+char *su_trim(char *str); // retire les espace en debut et en fin 
 
 bool su_startswith(const char *str, const char *prefix); // verifie si str commence par prefix
 
