@@ -1,4 +1,4 @@
-#include <strutil.h>
+#include "strutil.h"
 
 size_t su_strlcpy(char *dst, const char *src, size_t dstsize){
     // evaluons la taille de la source
@@ -10,7 +10,7 @@ size_t su_strlcpy(char *dst, const char *src, size_t dstsize){
             src_temp +=1;
         }
     // maintenant on copy du plus petit des 2 taille
-    int count = (src_taille + 1 < dstsize)?src_taille:dstsize;
+    int count = (src_taille < dstsize -1)?src_taille:dstsize-1;
     for (size_t i = 0; i < count; i++)
     {
         dst[i] = src[i];
