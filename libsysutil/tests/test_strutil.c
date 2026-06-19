@@ -144,9 +144,9 @@ int main(void) {
     puts("====== Tests strutil ======");
 
     test_strlcpy();
-    test_itoa();
     test_strtok_r();
     test_trim();
+    test_itoa();
 
     printf("\n%d PASS  %d FAIL\n", pass, fail);
     return fail == 0 ? 0 : 1;
