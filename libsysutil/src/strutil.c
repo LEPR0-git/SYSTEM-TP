@@ -221,4 +221,22 @@ if(posi_first != posi_last){
 return str;
 }
 
-bool su_startswith(const char *str, const char *prefix); // verifie si str commence par prefix
+bool su_startswith(const char *str, const char *prefix){
+    // on verifie si str commence par le prefix
+    bool meme = true;
+    if(str == NULL || prefix == NULL)
+        return false;
+        int i=0;
+    while(true){
+        if(*(str + i) != *(prefix +i)){
+            return false;
+        }
+        if(*(prefix + i) == '\0' && ( *(str +i) == '\0' || *(str +i) != '\0')){
+            return meme;
+        }
+        else{
+            return false;
+        }
+        i++;
+    }
+}
