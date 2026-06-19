@@ -46,7 +46,7 @@ size_t su_strlcat(char *dst, const char *src, size_t dstsize){
         dst[dest_taille + i] = src[i];
         i++;
     }
-    dst[i+src_taille] = '\0';
+    dst[i+dest_taille] = '\0';
     return  dest_taille + src_taille;
 }
 
