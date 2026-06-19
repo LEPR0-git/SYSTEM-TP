@@ -1,6 +1,6 @@
-#include "llist.h"
-#include <stdlib.h>   
-
+ #include "llist.h"
+ #include <stdlib.h>   
+ 
 
 LList *ll_create(void (*free_data)(void *)){
    LList *l = malloc(sizeof(LList));
@@ -199,3 +199,4 @@ void ll_destroy(LList **l){
    free(*l);
    *l = NULL;   // invalide le pointeur de l'appelant — anti dangling pointer 
 }
+>>>>>>> 47c8fcf991530f15da7192efd4144b66c0e7ff9f
