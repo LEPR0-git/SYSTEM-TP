@@ -188,9 +188,37 @@ char *token = *saveptr;
     return token;
 }
 
-char su_trim(char *str){
-    // on va trimmer la chaine str
+char *su_trim(char *str){
+// on va chercher la position du premier et dernier element non vide
+int posi_first = -1, posi_last = 0;
 
+
+int i=0;
+while(*(str+i) != '\0'){
+    if(*(str+i) != ' ' && posi_first == -1){
+        posi_first = i; 
+        posi_last = i;
+    }
+    if(posi_first != -1 && *(str+i) != ' ')
+        posi_last = i;
+i++;
+}
+
+// maintenant on trim
+if(posi_first==posi_last && posi_first==0)
+    return str;
+if(posi_first==posi_last && posi_first!=0)
+    {
+        *(str +posi_last +1) = '\0';
+    }
+if(posi_first != posi_last){
+    for(i=0;i<=posi_last;i++){
+        *(str+i) = *(str+i+posi_first);
+    }
+    *(str+posi_last - posi_first +1) = '\0';
+}
+
+return str;
 }
 
 bool su_startswith(const char *str, const char *prefix); // verifie si str commence par prefix
