@@ -2,7 +2,7 @@
 
 size_t su_strlcpy(char *dst, const char *src, size_t dstsize){
     // evaluons la taille de la source
-    char *src_temp = src;
+   const char *src_temp = src;
     int src_taille = 0;
     while(*src_temp != '\0')
         {
@@ -28,7 +28,7 @@ size_t su_strlcat(char *dst, const char *src, size_t dstsize){
     int dest_taille = 0, src_taille = 0;
 
     // on compte le nombre d'element dans la destination
-    char * dest_temp = dst;
+    const char * dest_temp = dst;
         while(*dest_temp != '\0'){
             dest_taille++;
             dest_temp+=1;
@@ -49,6 +49,7 @@ size_t su_strlcat(char *dst, const char *src, size_t dstsize){
     dst[i+dest_taille] = '\0';
     return  dest_taille + src_taille;
 }
+
 
 int su_itoa(int val, char *buf, size_t bufsize, int base){
     
