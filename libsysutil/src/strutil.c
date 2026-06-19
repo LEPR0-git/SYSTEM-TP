@@ -188,7 +188,6 @@ char *token = *saveptr;
     return token;
 }
 
-
 char su_trim(char *str){
     // on va trimmer la chaine str
 
